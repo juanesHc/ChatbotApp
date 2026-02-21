@@ -1,5 +1,5 @@
 <div class="container">
-  <h1>Hola</h1>
+  <h1>Hola, {{ userName }}</h1>
   <h2>Mis chats</h2>
   
   <div *ngIf="isLoading" class="loading">Cargando chats...</div>
@@ -13,13 +13,13 @@
             <!-- Hacer clic en el nombre para abrir el chat -->
             <span class="chat-name" (click)="openChat(item)">{{ item.name }}</span>
             <div class="chat-actions">
-              <button class="btn-edit" (click)="editChat(item); $event.stopPropagation()" title="Editar">
+              <button class="btn-edit" (click)="editChat(item, $event)" title="Editar">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                 </svg>
               </button>
-              <button class="btn-delete" (click)="deleteChat(item); $event.stopPropagation()" title="Borrar">
+              <button class="btn-delete" (click)="deleteChat(item, $event)" title="Borrar">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="3 6 5 6 21 6"></polyline>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -35,7 +35,14 @@
       <p class="no-chats">No tienes chats disponibles</p>
     }
   }
+
+  <button class="btn-manage-memories" (click)="openMemoriesModal()" title="Gestionar memorias">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+    </svg>
+  </button>
   
+  <!-- Botón flotante de crear chat -->
   <button class="btn-create-chat" (click)="createChat()" title="Crear nuevo chat">
     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -44,4 +51,109 @@
   </button>
 </div>
 
-<!-- Todos tus modales... -->
+<!-- Modal crear chat -->
+@if (showCreateModal) {
+  <div class="modal-overlay" (click)="closeCreateModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>Crear nuevo chat</h3>
+      <input type="text" class="modal-input" [(ngModel)]="newChatName" placeholder="Nombre del chat" (keyup.enter)="confirmCreateChat()">
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" (click)="closeCreateModal()">Cancelar</button>
+        <button type="button" class="btn-confirm" (click)="confirmCreateChat()">Crear</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal editar chat -->
+@if (showEditModal) {
+  <div class="modal-overlay" (click)="closeEditModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>Editar chat</h3>
+      <input type="text" class="modal-input" [(ngModel)]="editChatName" placeholder="Nombre del chat" (keyup.enter)="confirmEditChat()">
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" (click)="closeEditModal()">Cancelar</button>
+        <button type="button" class="btn-confirm" (click)="confirmEditChat()">Guardar</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal confirmar borrado -->
+@if (showDeleteModal && chatToDelete) {
+  <div class="modal-overlay" (click)="closeDeleteModal()">
+    <div class="modal-content modal-delete" (click)="$event.stopPropagation()">
+      <div class="delete-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          <line x1="10" y1="11" x2="10" y2="17"></line>
+          <line x1="14" y1="11" x2="14" y2="17"></line>
+        </svg>
+      </div>
+      <p class="delete-message">¿Estás seguro de que quieres borrar el chat <strong>{{ chatToDelete.name }}</strong>?</p>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" (click)="closeDeleteModal()">Cancelar</button>
+        <button type="button" class="btn-delete-confirm" (click)="confirmDeleteChat()">Borrar</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal éxito -->
+@if (showSuccessModal) {
+  <div class="modal-overlay" (click)="closeSuccessModal()">
+    <div class="modal-content modal-success" (click)="$event.stopPropagation()">
+      <div class="success-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <p class="success-message">{{ successMessage }}</p>
+      <button type="button" class="btn-confirm" (click)="closeSuccessModal()">Aceptar</button>
+    </div>
+  </div>
+}
+@if (showMemoriesModal) {
+  <div class="modal-overlay" (click)="closeMemoriesModal()">
+    <div class="modal-content modal-memories" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Gestionar Memorias</h3>
+        <button class="btn-close-modal" (click)="closeMemoriesModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      
+      @if (loadingMemories) {
+        <div class="loading-memories">
+          <div class="spinner"></div>
+          <p>Cargando memorias...</p>
+        </div>
+      } @else if (memories.length === 0) {
+        <div class="empty-memories">
+          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+          </svg>
+          <p>No hay memorias guardadas aún</p>
+          <p class="empty-subtitle">Las memorias se crean automáticamente a medida que conversas</p>
+        </div>
+      } @else {
+        <div class="memories-list">
+          @for (memory of memories; track memory.key) {
+            <div class="memory-item">
+              <div class="memory-key">{{ formatKey(memory.key) }}</div>
+              <div class="memory-value">{{ memory.value }}</div>
+            </div>
+          }
+        </div>
+      }
+      
+      <div class="modal-actions">
+        <button class="btn-confirm" (click)="closeMemoriesModal()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+}
