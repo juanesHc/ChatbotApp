@@ -29,7 +29,7 @@ export class LoginComponent implements OnInit {
   
       if (token) {
         this.authService.saveToken(token);
-        this.router.navigate(['/userhome']);
+        this.router.navigate(['/home']);
 
       }
   

@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { LoginService } from '../login/login.service';
 
 export interface CookieOptions {
   expires?: Date | number;
@@ -122,7 +121,7 @@ export class CookieService {
       sameSite: 'Strict'
     });
 
-    console.log(`✅ Token guardado en cookie (expira en ${expirationDays} día(s))`);
+    console.log(`Token guardado en cookie (expira en ${expirationDays} día(s))`);
   }
 
 
@@ -133,7 +132,7 @@ export class CookieService {
 
   deleteToken(): void {
     this.delete(this.TOKEN_KEY);
-    console.log('🗑️ Token eliminado de la cookie');
+    console.log('Token eliminado de la cookie');
   }
 
 

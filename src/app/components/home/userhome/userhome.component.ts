@@ -3,24 +3,23 @@ import { UserhomeService } from '../../../services/home/user/userhome.service';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { RetrieveChatsNameResponseDto } from '../../../model/chat/retrieve/RetrieveChatsNameResponseDto';
-import { RegisterChatNameResponseDto } from '../../../model/chat/register/RegisterChatNameResponseDto';
 import { RegisterChatNameRequestDto } from '../../../model/chat/register/RegisterChatNameRequestDto';
 import { FormsModule } from '@angular/forms';
 import { RetrieveGlobalMemoryResponseDto } from '../../../model/memory/RetrieveGlobalMemoryResponseDto';
 import { MemoryService } from '../../../services/memory/memory.service';
-import { CookieService } from '../../../services/cookie/cookie.service';
 import { LoginService } from '../../../services/login/login.service';
+import { SidebarComponent } from '../sidebar/sidebar.component';
 
 @Component({
   selector: 'app-userhome',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, SidebarComponent],
   templateUrl: './userhome.component.html',
   styleUrl: './userhome.component.css'
 })
 export class UserhomeComponent implements OnInit {
 
-  
+  deletingMemoryId: string | null = null;
 
   chats: RetrieveChatsNameResponseDto[] = [];
   isLoading: boolean = true;
@@ -236,6 +235,19 @@ editChat(chat: RetrieveChatsNameResponseDto, event?: Event): void {
       .split('_')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
+  }
+
+  deleteMemory(memoryId: string): void {
+    this.deletingMemoryId = memoryId;
+    this.memoryService.deleteMemory(memoryId).subscribe({
+      next: () => {
+        this.memories = this.memories.filter(m => m.id !== memoryId);
+        this.deletingMemoryId = null;
+      },
+      error: () => {
+        this.deletingMemoryId = null;
+      }
+    });
   }
 
 }

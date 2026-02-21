@@ -18,7 +18,6 @@ export class ChatsService {
     return this.http.get<RetrieveMessageResponseDto[]>(`${this.chatsBaseUrl}/${chatId}/messages`);
   }
 
-  // Enviar mensaje al bot
   askBot(chatId: string, content: RegisterMessageRequestDto): Observable<ChatBotResponseDto> {
     return this.http.post<ChatBotResponseDto>(`${this.chatsBaseUrl}/${chatId}/ask`, content);
   }

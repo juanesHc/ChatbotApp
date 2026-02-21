@@ -25,18 +25,25 @@ export class UserhomeService {
     return id;
   }
 
-  private getHeaders(): HttpHeaders {
-    return new HttpHeaders({
-      'Authorization': `Bearer ${this.loginService.getToken()}`
-    });
-  }
 
-  getChatsNameList(): Observable<RetrieveChatsNameResponseDto[]> {
-    return this.http.get<RetrieveChatsNameResponseDto[]>(
-      `${this.chatsBaseUrl}/${this.personId}/retrieve/names`,
-      { headers: this.getHeaders() }
-    );
-  }
+  private getHeaders(): HttpHeaders {
+  const token = this.loginService.getToken();
+  console.log('Construyendo header con token:', token);
+  const headers = new HttpHeaders({
+    'Authorization': `Bearer ${token}`
+  });
+  console.log('Headers creados:', headers.get('Authorization'));
+  return headers;
+}
+
+
+getChatsNameList(): Observable<RetrieveChatsNameResponseDto[]> {
+  const headers = this.getHeaders();
+  return this.http.get<RetrieveChatsNameResponseDto[]>(
+    `${this.chatsBaseUrl}/${this.personId}/retrieve/names`,
+    { headers }
+  );
+}
 
   registerChatName(request: RegisterChatNameRequestDto): Observable<RegisterChatNameResponseDto> {
     return this.http.post<RegisterChatNameResponseDto>(

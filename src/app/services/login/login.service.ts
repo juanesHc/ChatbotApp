@@ -1,4 +1,3 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { CookieService } from '../cookie/cookie.service';
 
@@ -7,7 +6,6 @@ import { CookieService } from '../cookie/cookie.service';
 export class LoginService {
 
   constructor(
-    private http: HttpClient,
     private cookieService: CookieService
   ) {}
 
@@ -56,6 +54,10 @@ export class LoginService {
 
   getUserName(): string {
     return this.decodeToken().name;
+  }
+
+  getRol(): string | null {
+    return this.decodeToken().role || null;
   }
 
 }
