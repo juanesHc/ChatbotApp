@@ -1,0 +1,180 @@
+<div class="users-page">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        Usuarios
+      </h1>
+      @if(pagedUsers) {
+        <span class="total-badge">{{ pagedUsers.totalElements }} registros</span>
+      }
+    </div>
+
+    <button class="btn-filter" [class.active]="showFilters" (click)="showFilters = !showFilters">
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+      </svg>
+      Filtros
+      @if(hasActiveFilters) { <span class="filter-dot"></span> }
+    </button>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="filters-panel" [class.open]="showFilters">
+    <form [formGroup]="filterForm" class="filters-grid">
+      <div class="filter-group">
+        <label>Nombre</label>
+        <input type="text" formControlName="givenName" placeholder="Ej: Juan" />
+      </div>
+      <div class="filter-group">
+        <label>Apellido</label>
+        <input type="text" formControlName="familyName" placeholder="Ej: Pérez" />
+      </div>
+      <div class="filter-group">
+        <label>Email</label>
+        <input type="email" formControlName="email" placeholder="correo@ejemplo.com" />
+      </div>
+      <div class="filter-group">
+        <label>Rol</label>
+        <select formControlName="roleName">
+          <option value="">Todos</option>
+          @for(r of roles; track r) {
+            <option [value]="r">{{ r }}</option>
+          }
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Desde</label>
+        <input type="date" formControlName="sourceDate" />
+      </div>
+      <div class="filter-group">
+        <label>Hasta</label>
+        <input type="date" formControlName="targetDate" />
+      </div>
+      <div class="filter-group filter-actions">
+        <button type="button" class="btn-clear" (click)="clearFilters()" [disabled]="!hasActiveFilters">
+          Limpiar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- TABLA -->
+  <div class="table-container">
+
+    @if(loading) {
+      <div class="state-overlay">
+        <div class="spinner"></div>
+        <p>Cargando usuarios...</p>
+      </div>
+    }
+
+    @if(error && !loading) {
+      <div class="state-overlay error">
+        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <p>{{ error }}</p>
+        <button class="btn-retry" (click)="loadUsers()">Reintentar</button>
+      </div>
+    }
+
+    @if(!loading && !error && pagedUsers && pagedUsers.content.length === 0) {
+      <div class="state-overlay">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <p>No se encontraron usuarios.</p>
+        <button class="btn-clear" (click)="clearFilters()">Limpiar filtros</button>
+      </div>
+    }
+
+    @if(!loading && !error && pagedUsers && pagedUsers.content.length > 0) {
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th class="col-avatar"></th>
+            @for(col of sortableColumns; track col.key) {
+              <th class="sortable" [class.active]="isSortActive(col.key)" (click)="sortBy(col.key)">
+                {{ col.label }} <span class="sort-icon">{{ getSortIcon(col.key) }}</span>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for(user of pagedUsers.content; track trackByUser($index, user)) {
+            <tr class="user-row">
+              <td class="col-avatar">
+                <div class="avatar">{{ getInitials(user) }}</div>
+              </td>
+              <td class="col-name">{{ user.givenName }}</td>
+              <td>{{ user.familyName }}</td>
+              <td class="col-email">{{ user.email }}</td>
+              <td>
+                <span [ngClass]="['badge', 'badge--' + (user.roleName ? user.roleName.toLowerCase() : '')]">
+                  {{ user.roleName }}
+                </span>
+              </td>
+              <td class="col-date">{{ user.createdAt | date:'dd/MM/yyyy' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+  </div>
+
+  <!-- PAGINACIÓN -->
+  @if(pagedUsers && pagedUsers.totalPages > 1) {
+    <div class="pagination">
+      <span class="pagination-info">
+        Página {{ pagedUsers.page + 1 }} de {{ pagedUsers.totalPages }}
+      </span>
+
+      <div class="pagination-controls">
+        <button class="page-btn" (click)="goToPage(0)" [disabled]="pagedUsers.page === 0">«</button>
+        <button class="page-btn" (click)="goToPage(pagedUsers.page - 1)" [disabled]="pagedUsers.page === 0">‹</button>
+
+        @for(p of getPagesArray(); track p) {
+          <button class="page-btn" [class.current]="p === pagedUsers.page" (click)="goToPage(p)">
+            {{ p + 1 }}
+          </button>
+        }
+
+        <button class="page-btn" (click)="goToPage(pagedUsers.page + 1)" [disabled]="pagedUsers.page === pagedUsers.totalPages - 1">›</button>
+        <button class="page-btn" (click)="goToPage(pagedUsers.totalPages - 1)" [disabled]="pagedUsers.page === pagedUsers.totalPages - 1">»</button>
+      </div>
+
+      <div class="pagination-size">
+        <label>Filas:</label>
+        <select (change)="onSizeChange(+$any($event.target).value)">
+          @for(s of sizeOptions; track s) {
+            <option [value]="s" [selected]="s === pagination.size">{{ s }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  }
+
+  <!-- BOTÓN REGISTRAR -->
+<div class="floating-register">
+  <button class="btn-register" (click)="goToRegister()">
+    + Registrar Usuario
+  </button>
+</div>
+
+</div>

@@ -3,46 +3,57 @@ import { UserhomeService } from '../../../services/home/user/userhome.service';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { RetrieveChatsNameResponseDto } from '../../../model/chat/retrieve/RetrieveChatsNameResponseDto';
-import { RegisterChatNameResponseDto } from '../../../model/chat/register/RegisterChatNameResponseDto';
 import { RegisterChatNameRequestDto } from '../../../model/chat/register/RegisterChatNameRequestDto';
 import { FormsModule } from '@angular/forms';
+import { RetrieveGlobalMemoryResponseDto } from '../../../model/memory/RetrieveGlobalMemoryResponseDto';
+import { MemoryService } from '../../../services/memory/memory.service';
+import { LoginService } from '../../../services/login/login.service';
+import { SidebarComponent } from '../sidebar/sidebar.component';
 
 @Component({
   selector: 'app-userhome',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, SidebarComponent],
   templateUrl: './userhome.component.html',
   styleUrl: './userhome.component.css'
 })
 export class UserhomeComponent implements OnInit {
 
+  deletingMemoryId: string | null = null;
+
   chats: RetrieveChatsNameResponseDto[] = [];
   isLoading: boolean = true;
   errorMessage: string = '';
 
-  // Variables para el modal de crear
   showCreateModal: boolean = false;
   newChatName: string = '';
-  
-  // Variables para el modal de editar
+
   showEditModal: boolean = false;
   editingChat: RetrieveChatsNameResponseDto | null = null;
   editChatName: string = '';
-  
-  // Variables para el modal de confirmación de borrado
+
   showDeleteModal: boolean = false;
   chatToDelete: RetrieveChatsNameResponseDto | null = null;
-  
-  // Variables para el modal de éxito
+
   showSuccessModal: boolean = false;
   successMessage: string = '';
+
+  showMemoriesModal: boolean = false;
+  memories: RetrieveGlobalMemoryResponseDto[] = [];
+  loadingMemories: boolean = false;
+
+  userName: string = "";
 
   constructor(
     private userhomeService: UserhomeService,
     private router: Router,
+    private memoryService:MemoryService,
+    private loginService:LoginService
   ) {}
 
   ngOnInit(): void {
+ this.userName = this.loginService.getUserName();
+
     this.loadChats();
   }
 
@@ -95,11 +106,14 @@ export class UserhomeComponent implements OnInit {
   }
 
   // ========== EDITAR CHAT ==========
-  editChat(chat: RetrieveChatsNameResponseDto): void {
-    this.editingChat = chat;
-    this.editChatName = chat.name;
-    this.showEditModal = true;
+editChat(chat: RetrieveChatsNameResponseDto, event?: Event): void {
+  if (event) {
+    event.stopPropagation();
   }
+  this.editingChat = chat;
+  this.editChatName = chat.name;
+  this.showEditModal = true;
+}
 
   closeEditModal(): void {
     this.showEditModal = false;
@@ -135,7 +149,10 @@ export class UserhomeComponent implements OnInit {
   }
 
   // ========== BORRAR CHAT ==========
-  deleteChat(chat: RetrieveChatsNameResponseDto): void {
+  deleteChat(chat: RetrieveChatsNameResponseDto, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
     if (!chat.id) {
       alert('Error: no se puede borrar el chat');
       return;
@@ -185,6 +202,52 @@ export class UserhomeComponent implements OnInit {
     if (chat.id) {
       this.router.navigate(['/chat', chat.id]);
     }
+  }
+
+  openMemoriesModal(): void {
+    this.showMemoriesModal = true;
+    this.loadMemories();
+  }
+
+  closeMemoriesModal(): void {
+    this.showMemoriesModal = false;
+    this.memories = [];
+  }
+
+  loadMemories(): void {
+    this.loadingMemories = true;
+    this.memoryService.getMemories().subscribe({
+      next: (data) => {
+        console.log('Memorias cargadas:', data);
+        this.memories = data;
+        this.loadingMemories = false;
+      },
+      error: (error) => {
+        console.error('Error al cargar memorias:', error);
+        this.loadingMemories = false;
+      }
+    });
+  }
+
+  formatKey(key: string): string {
+    // Convierte "user_name" a "Nombre de usuario"
+    return key
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  deleteMemory(memoryId: string): void {
+    this.deletingMemoryId = memoryId;
+    this.memoryService.deleteMemory(memoryId).subscribe({
+      next: () => {
+        this.memories = this.memories.filter(m => m.id !== memoryId);
+        this.deletingMemoryId = null;
+      },
+      error: () => {
+        this.deletingMemoryId = null;
+      }
+    });
   }
 
 }
