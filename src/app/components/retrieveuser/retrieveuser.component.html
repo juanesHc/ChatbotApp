@@ -47,7 +47,7 @@
         <label>Rol</label>
         <select formControlName="roleName">
           <option value="">Todos</option>
-          @for(r of roleOptions; track r) {
+          @for(r of roles; track r) {
             <option [value]="r">{{ r }}</option>
           }
         </select>
@@ -169,5 +169,12 @@
       </div>
     </div>
   }
+
+  <!-- BOTÓN REGISTRAR -->
+<div class="floating-register">
+  <button class="btn-register" (click)="goToRegister()">
+    + Registrar Usuario
+  </button>
+</div>
 
 </div>

@@ -28,11 +28,9 @@ export class UserhomeService {
 
   private getHeaders(): HttpHeaders {
   const token = this.loginService.getToken();
-  console.log('Construyendo header con token:', token);
   const headers = new HttpHeaders({
     'Authorization': `Bearer ${token}`
   });
-  console.log('Headers creados:', headers.get('Authorization'));
   return headers;
 }
 
