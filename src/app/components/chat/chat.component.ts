@@ -42,6 +42,11 @@ export class ChatComponent implements OnInit, AfterViewChecked {
     });
   }
 
+
+goHome(): void {
+  this.router.navigate(['/home']); 
+}
+
   ngAfterViewChecked(): void {
     this.scrollToBottom();
   }

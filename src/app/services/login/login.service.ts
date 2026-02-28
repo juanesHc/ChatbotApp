@@ -49,7 +49,7 @@ export class LoginService {
   }
 
   getUserId(): string | null {
-    return this.decodeToken().id || null;
+    return this.decodeToken().id ;
   }
 
   getUserName(): string {
