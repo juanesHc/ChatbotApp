@@ -60,6 +60,10 @@ export class RetrieveuserComponent implements OnInit, OnDestroy {
     });
   }
 
+  goHome(): void {
+    this.router.navigate(['/home']); // ajusta la ruta según tu app
+  }
+
   ngOnInit(): void {
 
     // 🔹 Cargar roles desde backend

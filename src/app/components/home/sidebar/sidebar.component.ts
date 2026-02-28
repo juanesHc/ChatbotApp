@@ -28,4 +28,12 @@ export class SidebarComponent {
     this.authService.logout();
     this.router.navigate(['/login']);
   }
+
+  myaccount(): void{
+    this.router.navigate(['/my-account']);
+  }
+
+  notification():void{
+    this.router.navigate(['notification']);
+  }
 }
