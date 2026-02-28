@@ -9,6 +9,7 @@ export interface RetrieveUsersFilterRequest {
 }
 
 export interface UserSummary {
+  personId: string;
   givenName: string;
   familyName: string;
   email: string;

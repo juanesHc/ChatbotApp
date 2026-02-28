@@ -532,3 +532,21 @@
     font-size: 14px;
   }
 }
+
+.send-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #e8622a;
+  padding: 0.4rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.send-btn:hover {
+  background: #fde0ce;
+  transform: scale(1.1);
+}
