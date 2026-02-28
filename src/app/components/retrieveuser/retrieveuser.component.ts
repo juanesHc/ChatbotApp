@@ -64,6 +64,12 @@ export class RetrieveuserComponent implements OnInit, OnDestroy {
     this.router.navigate(['/home']); // ajusta la ruta según tu app
   }
 
+
+
+goToSendNotification(personId: string): void {
+  this.router.navigate(['/send-notification', personId]);
+}
+
   ngOnInit(): void {
 
     // 🔹 Cargar roles desde backend

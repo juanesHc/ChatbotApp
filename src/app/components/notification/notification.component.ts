@@ -35,6 +35,16 @@ export class NotificationComponent implements OnInit {
     this.loadNotifications();
   }
 
+  markAsRead(notificationId: string): void {
+    this.notificationService.markAsRead(notificationId).subscribe({
+      next: () => {
+        const notification = this.notifications.find(n => n.notificationId === notificationId);
+        if (notification) notification.read = true;
+      },
+      error: (error) => console.error('Error al marcar como leída:', error)
+    });
+  }
+
   goHome(): void {
     this.router.navigate(['/home']); // ajusta la ruta según tu app
   }

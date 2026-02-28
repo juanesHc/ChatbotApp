@@ -113,6 +113,7 @@
                 {{ col.label }} <span class="sort-icon">{{ getSortIcon(col.key) }}</span>
               </th>
             }
+            <th class="col-actions"></th>
           </tr>
         </thead>
         <tbody>
@@ -130,6 +131,14 @@
                 </span>
               </td>
               <td class="col-date">{{ user.createdAt | date:'dd/MM/yyyy' }}</td>
+              <td class="col-actions">
+                <button class="send-btn" (click)="goToSendNotification(user.personId)" title="Enviar notificación">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 19l-9-7 9-7v14zm0-7h9" />
+                  </svg>
+                </button>
+              </td>
             </tr>
           }
         </tbody>

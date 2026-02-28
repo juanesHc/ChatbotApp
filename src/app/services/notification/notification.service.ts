@@ -24,4 +24,8 @@ export class NotificationService {
     return this.http.post<EliminationNotificationResponseDto>(`${this.baseUrl}/send`, { message });
   }
 
+  markAsRead(notificationId: string): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/read/${notificationId}`, {});
+  }
+
 }
