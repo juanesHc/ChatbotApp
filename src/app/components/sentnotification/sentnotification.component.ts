@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { RegisterService } from '../../services/register/register.service';
+import { LoginService } from '../../services/login/login.service';
 
 @Component({
   selector: 'app-sentnotification',
@@ -26,7 +27,8 @@ export class SentnotificationComponent implements OnInit{
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private notificationSendService: RegisterService
+    private notificationSendService: RegisterService,
+    private loginService:LoginService
   ) {}
 
   ngOnInit(): void {
@@ -38,12 +40,19 @@ export class SentnotificationComponent implements OnInit{
       this.errorMessage = 'Por favor completa todos los campos';
       return;
     }
-
+  
+    const senderId = this.loginService.getUserId();
+    if (!senderId) {
+      this.errorMessage = 'No se pudo obtener el usuario';
+      return;
+    }
+  
     this.errorMessage = '';
     this.isSending = true;
     this.sentAt = new Date();
-
+  
     this.notificationSendService.sendNotification(this.personId, {
+      senderId: senderId, // 👈 agregar
       subject: this.subject,
       messageDescription: this.messageDescription
     }).subscribe({

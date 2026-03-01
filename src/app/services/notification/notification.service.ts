@@ -12,8 +12,19 @@ export class NotificationService {
 
   constructor(private http: HttpClient) {}
 
-  getNotifications(personId: string): Observable<RetrieveMyNotificationResponseDto[]> {
-    return this.http.get<RetrieveMyNotificationResponseDto[]>(`${this.baseUrl}/retrieve/${personId}`);
+  getNotifications(personId: string, filters?: {
+    senderId?: string,
+    read?: boolean,
+    role?: 'SENDER' | 'RECEIVER'
+  }): Observable<RetrieveMyNotificationResponseDto[]> {
+    let params: any = {};
+    if (filters?.senderId) params['senderId'] = filters.senderId;
+    if (filters?.read !== undefined) params['read'] = filters.read;
+    if (filters?.role) params['role'] = filters.role;
+  
+    return this.http.get<RetrieveMyNotificationResponseDto[]>(
+      `${this.baseUrl}/retrieve/${personId}`, { params }
+    );
   }
 
   deleteNotification(notificationId: string): Observable<EliminationNotificationResponseDto> {

@@ -25,6 +25,9 @@ export class NotificationComponent implements OnInit {
   showSuccessModal: boolean = false;
   successMessage: string = '';
 
+  activeFilter: 'ALL' | 'UNREAD' | 'READ' | 'SENT' = 'ALL';
+  personId: string='';
+
   constructor(
     private notificationService: NotificationService,
     private loginService: LoginService,
@@ -32,6 +35,7 @@ export class NotificationComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.personId = this.loginService.getUserId() || ''; 
     this.loadNotifications();
   }
 
@@ -50,22 +54,25 @@ export class NotificationComponent implements OnInit {
   }
 
   loadNotifications(): void {
-    const personId = this.loginService.getUserId();
-
-    if (!personId) {
-      this.errorMessage = 'No se pudo obtener el usuario';
+    if (!this.personId) {
       this.isLoading = false;
       return;
     }
   
     this.isLoading = true;
-    this.notificationService.getNotifications(personId).subscribe({
+    this.errorMessage = '';
+  
+    let filters: any = {};
+    if (this.activeFilter === 'READ')   filters.read = true;
+    if (this.activeFilter === 'UNREAD') filters.read = false;
+    if (this.activeFilter === 'SENT')   filters.role = 'SENDER';
+  
+    this.notificationService.getNotifications(this.personId, filters).subscribe({
       next: (data) => {
         this.notifications = data;
         this.isLoading = false;
       },
-      error: (error) => {
-        console.error('Error al cargar notificaciones:', error);
+      error: () => {
         this.errorMessage = 'No se pudieron cargar las notificaciones';
         this.isLoading = false;
       }
@@ -97,4 +104,10 @@ export class NotificationComponent implements OnInit {
     this.showSuccessModal = false;
     this.successMessage = '';
   }
+
+  setFilter(filter: 'ALL' | 'UNREAD' | 'READ' | 'SENT'): void {
+    this.activeFilter = filter;
+    this.loadNotifications();
+  }
+
 }
